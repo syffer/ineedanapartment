@@ -43,7 +43,7 @@ def main(args):
 
     try:
         while True:
-            new_locations = aggregator.retrieve_new_locations(criteria)
+            new_locations = aggregator.retrieve_new_locations(criteria, args.since)
             if new_locations:
                 alerter_manager.alert(new_locations)
 
@@ -59,6 +59,7 @@ if __name__ == "__main__":
     )
 
     parser.add_argument("--period", nargs="?", const=5, default=5, type=int, help="delay between each check in seconds")
+    parser.add_argument("--since", nargs="?", type=int, default=3, choices=range(1, 30))
 
     criteria_group = parser.add_argument_group("Criteria")
     criteria_group.add_argument("--min-price", type=int)

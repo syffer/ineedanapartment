@@ -1,5 +1,8 @@
 # coding: utf-8
 
+import datetime
+
+
 class LocationAggregator(object):
     __known_locations = set()
 
@@ -9,20 +12,26 @@ class LocationAggregator(object):
     def add_retriever(self, retriever):
         self.__retrievers.append(retriever)
 
-    def retrieve_new_locations(self, criteria):
-        retrieved_locations = self.__retrieve_locations(criteria)
+    def retrieve_new_locations(self, criteria, since=1):
+        today = datetime.datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+        yesterday = today - datetime.timedelta(days=since)
+
+        retrieved_locations = self.__retrieve_locations(criteria, yesterday)
         new_locations = retrieved_locations - self.__known_locations
+        unknown_locations = self.__known_locations - retrieved_locations
+        self.__known_locations.difference_update(unknown_locations)
         self.__known_locations.update(retrieved_locations)
 
         new_locations = list(new_locations)
         new_locations.sort(reverse=True)
         return new_locations
 
-    def __retrieve_locations(self, criteria):
+    def __retrieve_locations(self, criteria, from_date):
         return set(
             location
             for retriever in self.__retrievers
             for location in self.__safe_retrieve(retriever, criteria)
+            if location.date > from_date
         )
 
     def __safe_retrieve(self, retriever, criteria):

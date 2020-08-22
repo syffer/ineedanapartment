@@ -44,10 +44,9 @@ def main(args):
     try:
         while True:
             new_locations = aggregator.retrieve_new_locations(criteria)
-            if not new_locations:
-                return
+            if new_locations:
+                alerter_manager.alert(new_locations)
 
-            alerter_manager.alert(new_locations)
             time.sleep(args.period)
     except KeyboardInterrupt:
         pass

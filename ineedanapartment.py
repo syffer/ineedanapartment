@@ -66,7 +66,7 @@ if __name__ == "__main__":
         description="Easy way to get notified when a new apartment appears on ouest france for nantes."
     )
 
-    parser.add_argument("--period", nargs="?", const=5, default=5, type=int, help="delay between each check in seconds")
+    parser.add_argument("--period", nargs="?", default=5*60, type=int, help="delay between each check in seconds")
     parser.add_argument("--since", nargs="?", type=int, default=3, choices=range(1, 30))
     parser.add_argument("--save-locations", nargs="?", type=bool, const=True, default=False,
                         help="Save locations between executions")

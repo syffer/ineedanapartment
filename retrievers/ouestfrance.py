@@ -36,7 +36,8 @@ class OuestFranceLocationRetriever(retrievers.retriever.LocationRetriever):
         result = requests.get(url, params=params)
 
         soup = bs4.BeautifulSoup(result.text, features="html.parser")
-        tags = soup.find_all("a", class_="annLink")
+        tags = soup.find_all("a > div:not[.premium]", class_="annLink")
+        tags = [tag for tag in tags if "premium" not in tag["class"]]   # removes premium as they don't have dates
 
         parsed_url = urllib.parse.urlparse(url)
         base_url = "{uri.scheme}://{uri.netloc}".format(uri=parsed_url)

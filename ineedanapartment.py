@@ -103,14 +103,18 @@ if __name__ == "__main__":
 
     # getting the email password either in environment variable or via a prompt
     email_password = None if "--email" in sys.argv else os.environ.get("EMAIL_PASSWORD")
-    if not email_password:
+    if args.email and not email_password:
         email_password = getpass.getpass(prompt="Email password: ")
-    args.email.append(email_password)
+
+    if args.email:
+        args.email.append(email_password)
 
     # getting the sms twilio token either in environment variable or via a prompt
     twilio_token = None if "--sms" in sys.argv else os.environ.get("TWILIO_TOKEN")
-    if not twilio_token:
+    if args.sms and not twilio_token:
         twilio_token = getpass.getpass(prompt="Token: ")
-    args.sms.append(twilio_token)
+
+    if args.sms:
+        args.sms.append(twilio_token)
 
     main(args)

@@ -69,19 +69,20 @@ def main(args):
         pass
 
 
+def merge_env_variable(*env_vars, into=None):
+    if not into:
+        raise ValueError("'into' argument cannot be None")
+
+    env_var_values = [os.environ.get(key) for key in env_vars]
+    if not os.environ.get(into) and all(env_var_values):
+        os.environ[into] = "[" + ", ".join(env_var_values) + "]"
+
+
 if __name__ == "__main__":
     # fix: permettre de décomposer les variables d'environnement en plusieurs petites variables d'environnement
-    email_info = [os.environ.get(key) for key in ("EMAIL_HOST", "EMAIL_PORT", "EMAIL_USER")]
-    if not os.environ.get("EMAIL") and all(email_info):
-        os.environ["EMAIL"] = "[" + ", ".join(email_info) + "]"
-
-    sms_free_mobile_info = [os.environ.get(key) for key in ("FREE_MOBILE_USER",)]
-    if not os.environ.get("SMS_FREE_MOBILE") and all(sms_free_mobile_info):
-        os.environ["SMS_FREE_MOBILE"] = "[" + ", ".join(sms_free_mobile_info) + "]"
-
-    sms_twilio_info = [os.environ.get(key) for key in ["TWILIO_USER", "TWILIO_NUMBER_FROM", "TWILIO_NUMBER_TO"]]
-    if not os.environ.get("SMS_TWILIO") and all(sms_twilio_info):
-        os.environ["SMS_TWILIO"] = "[" + ", ".join(sms_twilio_info) + "]"
+    merge_env_variable("EMAIL_HOST", "EMAIL_PORT", "EMAIL_USER", into="EMAIL")
+    merge_env_variable("FREE_MOBILE_USER", into="SMS_FREE_MOBILE")
+    merge_env_variable("TWILIO_USER", "TWILIO_NUMBER_FROM", "TWILIO_NUMBER_TO", into="SMS_TWILIO")
 
     #
     parser = configargparse.ArgumentParser(

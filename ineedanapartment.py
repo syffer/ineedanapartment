@@ -115,7 +115,7 @@ if __name__ == "__main__":
                              help="alerts via sms using a free mobile account. Will ask for the free mobile password")
     alert_group.add_argument("--sms-twilio", nargs=3, metavar=("USERNAME", "FROM_NUMBER", "TO_NUMBER"),
                              env_var="SMS_TWILIO",
-                             help="alerts via an sms usin a twilio account. Will ask for Twilio token")
+                             help="alerts via an sms using a twilio account. Will ask for Twilio token")
 
     args = parser.parse_args()
 

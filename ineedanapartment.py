@@ -64,7 +64,7 @@ def main(args):
 
 if __name__ == "__main__":
     # fix: permettre de décomposer les variables d'environnement EMAIL et SMS_TWILIO en plusieurs petites variables d'environnement
-    email_info = [os.environ.get(key) for key in ("EMAIL_HOST", "EMAIL_PORT", "EMAIL_FROM")]
+    email_info = [os.environ.get(key) for key in ("EMAIL_HOST", "EMAIL_PORT", "EMAIL_USER")]
     if not os.environ.get("EMAIL") and all(email_info):
         os.environ["EMAIL"] = "[" + ", ".join(email_info) + "]"
 

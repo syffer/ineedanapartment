@@ -136,7 +136,7 @@ if __name__ == "__main__":
 
     # getting the sms twilio token either in environment variable or via a prompt
     if args.sms_twilio:
-        twilio_token = get_password("--swm-twilio", "TWILIO_TOKEN", "Twilio token: ")
+        twilio_token = get_password("--sms-twilio", "TWILIO_TOKEN", "Twilio token: ")
         args.sms.append(twilio_token)
 
     main(args)

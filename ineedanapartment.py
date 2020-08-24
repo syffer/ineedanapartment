@@ -2,6 +2,7 @@
 
 import argparse
 import getpass
+import os
 import time
 
 import alerts.manager
@@ -79,19 +80,47 @@ if __name__ == "__main__":
                                 help="if the apartment must have a parking spot")
 
     alert_group = parser.add_argument_group("Alerts")
+
+    default_email = (
+        os.environ.get("EMAIL_HOST"),
+        os.environ.get("EMAIL_PORT"),
+        os.environ.get("EMAIL_FROM")
+    )
+    default_email = default_email if all(default_email) else None
     alert_group.add_argument("--email", nargs=3, metavar=("HOST", "PORT", "EMAIL_FROM"),
+                             default=default_email,
                              help="alerts via an email. Will ask for the email password")
+
+    default_sms = (
+        os.environ.get("TWILIO_USERNAME"),
+        os.environ.get("TWILIO_FROM_NUMBER"),
+        os.environ.get("TWILIO_TO_NUMBER")
+    )
+    default_sms = default_sms if all(default_sms) else None
     alert_group.add_argument("--sms", nargs=3, metavar=("USERNAME", "FROM_NUMBER", "TO_NUMBER"),
+                             default=default_sms,
                              help="alerts via an sms. Will ask for Twilio token")
 
     args = parser.parse_args()
 
-    if args.email:
+    # getting the email password either in environment variable or via a prompt
+    if args.email and args.email == default_email:
+        email_password = os.environ.get("EMAIL_PASSWORD")
+        args.email = list(args.email)
+        args.email.append(email_password)
+
+    elif args.email and args.email != default_email:
         email_password = getpass.getpass(prompt="Email password: ")
         args.email.append(email_password)
 
-    if args.sms:
-        token = getpass.getpass(prompt="Token: ")
-        args.sms.append(token)
+    # getting the sms twilio token either in environment variable or via a prompt
+    if args.sms and args.sms == default_sms:
+        twilio_token = os.environ.get("TWILIO_TOKEN")
+        args.sms = list(args.sms)
+        args.sms.append(twilio_token)
+
+    elif args.sms:
+        twilio_token = getpass.getpass(prompt="Token: ")
+        args.sms.append(twilio_token)
 
     main(args)

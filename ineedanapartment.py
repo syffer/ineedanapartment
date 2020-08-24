@@ -63,6 +63,16 @@ def main(args):
 
 
 if __name__ == "__main__":
+    # fix: permettre de décomposer les variables d'environnement EMAIL et SMS_TWILIO en plusieurs petites variables d'environnement
+    email_info = [os.environ.get(key) for key in ("EMAIL_HOST", "EMAIL_PORT", "EMAIL_FROM")]
+    if not os.environ.get("EMAIL") and all(email_info):
+        os.environ["EMAIL"] = "[" + ", ".join(email_info) + "]"
+
+    sms_twilio_info = [os.environ.get(key) for key in ["TWILIO_USER", "TWILIO_NUMBER_FROM", "TWILIO_NUMBER_TO"]]
+    if not os.environ.get("SMS_TWILIO") and all(sms_twilio_info):
+        os.environ["SMS_TWILIO"] = "[" + ", ".join(sms_twilio_info) + "]"
+
+    #
     parser = configargparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         description="Easy way to get notified when a new apartment appears on ouest france for nantes."
@@ -98,7 +108,7 @@ if __name__ == "__main__":
     args.email.append(email_password)
 
     # getting the sms twilio token either in environment variable or via a prompt
-    twilio_token = None if "--sms" in sys.argv else os.environ.get("SMS_TWILIO_TOKEN")
+    twilio_token = None if "--sms" in sys.argv else os.environ.get("TWILIO_TOKEN")
     if not twilio_token:
         twilio_token = getpass.getpass(prompt="Token: ")
     args.sms.append(twilio_token)

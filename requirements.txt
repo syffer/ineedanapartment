@@ -2,4 +2,5 @@ beautifulsoup4
 twilio
 jsonpickle
 configargparse
+requests
 redis

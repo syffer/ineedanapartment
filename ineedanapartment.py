@@ -110,6 +110,7 @@ if __name__ == "__main__":
     alert_group.add_argument("--email", nargs=3, metavar=("HOST", "PORT", "EMAIL_FROM"), env_var="EMAIL",
                              help="alerts via an email. Will ask for the email password")
     alert_group.add_argument("--sms-free-mobile", nargs=1, metavar=("USER_LOGIN",), env_var="SMS_FREE_MOBILE",
+                             action="append",
                              help="alerts via sms using a free mobile account. Will ask for the free mobile password")
     alert_group.add_argument("--sms-twilio", nargs=3, metavar=("USERNAME", "FROM_NUMBER", "TO_NUMBER"),
                              env_var="SMS_TWILIO",

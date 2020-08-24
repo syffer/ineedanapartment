@@ -2,8 +2,10 @@
 
 import jsonpickle
 
+import savers.saver
 
-class LocationsSaver(object):
+
+class LocalLocationsSaver(savers.saver.LocationSaver):
     FILE_PATH = "saved_locations.json"
 
     def __init__(self):

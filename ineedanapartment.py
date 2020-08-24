@@ -14,7 +14,8 @@ import alerts.logs
 import retrievers.ouestfrance
 import retrievers.aggregator
 import criterias
-import savers
+import savers.redis
+import savers.local
 
 
 def main(args):
@@ -41,7 +42,7 @@ def main(args):
         )
         alerter_manager.add_alerter(sms_alerter)
 
-    saver = savers.LocationsSaver()
+    saver = savers.redis.RedisLocationSaver(args.redis_url) if args.redis_url else savers.local.LocalLocationsSaver()
     known_locations = saver.load_locations() if args.save_locations else set()
 
     criteria = criterias.Criteria(**vars(args))
@@ -83,6 +84,8 @@ if __name__ == "__main__":
     parser.add_argument("--since", nargs="?", type=int, default=3, choices=range(1, 30), env_var="SINCE")
     parser.add_argument("--save-locations", nargs="?", type=bool, const=True, default=False, env_var="SAVE_LOCATIONS",
                         help="Save locations between executions")
+    # TODO change / add other savers depending on config
+    parser.add_argument("--redis", dest="redis_url", env_var="REDIS_URL")
 
     criteria_group = parser.add_argument_group("Criteria")
     criteria_group.add_argument("--min-price", type=int, env_var="MIN_PRICE")

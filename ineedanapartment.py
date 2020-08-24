@@ -78,6 +78,10 @@ def merge_env_variable(*env_vars, into=None):
         os.environ[into] = "[" + ", ".join(env_var_values) + "]"
 
 
+def get_password(argument_needing_password, default_env_var, prompt):
+    return getpass.getpass(prompt=prompt) if argument_needing_password in sys.argv else os.environ.get(default_env_var)
+
+
 if __name__ == "__main__":
     # fix: permettre de décomposer les variables d'environnement en plusieurs petites variables d'environnement
     merge_env_variable("EMAIL_HOST", "EMAIL_PORT", "EMAIL_USER", into="EMAIL")
@@ -120,27 +124,19 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # getting the email password either in environment variable or via a prompt
-    email_password = None if "--email" in sys.argv else os.environ.get("EMAIL_PASSWORD")
-    if args.email and not email_password:
-        email_password = getpass.getpass(prompt="Email password: ")
-
     if args.email:
+        email_password = get_password("--email", "EMAIL_PASSWORD", "Email password: ")
         args.email.append(email_password)
 
     # getting the free mobile sms notification password
-    free_mobile_password = None if "--sms-free-mobile" in sys.argv else os.environ.get("FREE_MOBILE_PASSWORD")
-    if args.sms_free_mobile and not free_mobile_password:
-        free_mobile_password = getpass.getpass(prompt="Free mobile sms notification password: ")
-
     if args.sms_free_mobile:
+        free_mobile_password = get_password("--sms-free-mobile", "FREE_MOBILE_PASSWORD",
+                                            "Free mobile sms notification password: ")
         args.sms_free_mobile.append(free_mobile_password)
 
     # getting the sms twilio token either in environment variable or via a prompt
-    twilio_token = None if "--sms-twilio" in sys.argv else os.environ.get("TWILIO_TOKEN")
-    if args.sms_twilio and not twilio_token:
-        twilio_token = getpass.getpass(prompt="Token: ")
-
     if args.sms_twilio:
+        twilio_token = get_password("--swm-twilio", "TWILIO_TOKEN", "Twilio token: ")
         args.sms.append(twilio_token)
 
     main(args)

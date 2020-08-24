@@ -11,6 +11,7 @@ import alerts.logs
 import retrievers.ouestfrance
 import retrievers.aggregator
 import criterias
+import savers
 
 
 def main(args):
@@ -37,15 +38,21 @@ def main(args):
         )
         alerter_manager.add_alerter(sms_alerter)
 
+    saver = savers.LocationsSaver()
+    known_locations = saver.load_locations() if args.save_locations else set()
+
     criteria = criterias.Criteria(**vars(args))
     retriever = retrievers.ouestfrance.OuestFranceLocationRetriever()
-    aggregator = retrievers.aggregator.LocationAggregator(retriever)
+    aggregator = retrievers.aggregator.LocationAggregator(retriever, known_locations=known_locations)
 
     try:
         while True:
             new_locations = aggregator.retrieve_new_locations(criteria, args.since)
             if new_locations:
                 alerter_manager.alert(new_locations)
+
+            if args.save_locations:
+                saver.save_locations(aggregator.get_known_locations())
 
             time.sleep(args.period)
     except KeyboardInterrupt:
@@ -60,6 +67,8 @@ if __name__ == "__main__":
 
     parser.add_argument("--period", nargs="?", const=5, default=5, type=int, help="delay between each check in seconds")
     parser.add_argument("--since", nargs="?", type=int, default=3, choices=range(1, 30))
+    parser.add_argument("--save-locations", nargs="?", type=bool, const=True, default=False,
+                        help="Save locations between executions")
 
     criteria_group = parser.add_argument_group("Criteria")
     criteria_group.add_argument("--min-price", type=int)

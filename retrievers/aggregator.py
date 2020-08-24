@@ -6,8 +6,9 @@ import datetime
 class LocationAggregator(object):
     __known_locations = set()
 
-    def __init__(self, *retrievers):
+    def __init__(self, *retrievers, known_locations=None):
         self.__retrievers = list(retrievers)
+        self.__known_locations = set(known_locations) if known_locations else set()
 
     def add_retriever(self, retriever):
         self.__retrievers.append(retriever)
@@ -40,3 +41,6 @@ class LocationAggregator(object):
         except Exception as e:
             print("=> cannot retrieve locations with {} because {}".format(type(retriever), e))
             return set()
+
+    def get_known_locations(self):
+        return self.__known_locations

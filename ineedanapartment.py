@@ -1,8 +1,10 @@
 # coding: utf-8
 
 import argparse
+import configargparse
 import getpass
 import os
+import sys
 import time
 
 import alerts.manager
@@ -61,66 +63,44 @@ def main(args):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
+    parser = configargparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         description="Easy way to get notified when a new apartment appears on ouest france for nantes."
     )
 
-    parser.add_argument("--period", nargs="?", default=5*60, type=int, help="delay between each check in seconds")
-    parser.add_argument("--since", nargs="?", type=int, default=3, choices=range(1, 30))
-    parser.add_argument("--save-locations", nargs="?", type=bool, const=True, default=False,
+    parser.add_argument("--period", nargs="?", default=5 * 60, type=int, env_var="PERIOD",
+                        help="delay between each check in seconds")
+    parser.add_argument("--since", nargs="?", type=int, default=3, choices=range(1, 30), env_var="SINCE")
+    parser.add_argument("--save-locations", nargs="?", type=bool, const=True, default=False, env_var="SAVE_LOCATIONS",
                         help="Save locations between executions")
 
     criteria_group = parser.add_argument_group("Criteria")
-    criteria_group.add_argument("--min-price", type=int)
-    criteria_group.add_argument("--max-price", type=int)
-    criteria_group.add_argument("--min-surface", type=int)
-    criteria_group.add_argument("--max-surface", type=int)
+    criteria_group.add_argument("--min-price", type=int, env_var="MIN_PRICE")
+    criteria_group.add_argument("--max-price", type=int, env_var="MAX_PRICE")
+    criteria_group.add_argument("--min-surface", type=int, env_var="MIN_SURFACE")
+    criteria_group.add_argument("--max-surface", type=int, env_var="MAX_SURFACE")
     criteria_group.add_argument("--with-parking-spot", nargs="?", type=bool, const=True, default=False,
+                                env_var="WITH_PARKING_SPOT",
                                 help="if the apartment must have a parking spot")
 
     alert_group = parser.add_argument_group("Alerts")
-
-    default_email = (
-        os.environ.get("EMAIL_HOST"),
-        os.environ.get("EMAIL_PORT"),
-        os.environ.get("EMAIL_FROM")
-    )
-    default_email = default_email if all(default_email) else None
-    alert_group.add_argument("--email", nargs=3, metavar=("HOST", "PORT", "EMAIL_FROM"),
-                             default=default_email,
+    alert_group.add_argument("--email", nargs=3, metavar=("HOST", "PORT", "EMAIL_FROM"), env_var="EMAIL",
                              help="alerts via an email. Will ask for the email password")
-
-    default_sms = (
-        os.environ.get("TWILIO_USERNAME"),
-        os.environ.get("TWILIO_FROM_NUMBER"),
-        os.environ.get("TWILIO_TO_NUMBER")
-    )
-    default_sms = default_sms if all(default_sms) else None
-    alert_group.add_argument("--sms", nargs=3, metavar=("USERNAME", "FROM_NUMBER", "TO_NUMBER"),
-                             default=default_sms,
+    alert_group.add_argument("--sms", nargs=3, metavar=("USERNAME", "FROM_NUMBER", "TO_NUMBER"), env_var="SMS_TWILIO",
                              help="alerts via an sms. Will ask for Twilio token")
 
     args = parser.parse_args()
 
     # getting the email password either in environment variable or via a prompt
-    if args.email and args.email == default_email:
-        email_password = os.environ.get("EMAIL_PASSWORD")
-        args.email = list(args.email)
-        args.email.append(email_password)
-
-    elif args.email and args.email != default_email:
+    email_password = None if "--email" in sys.argv else os.environ.get("EMAIL_PASSWORD")
+    if not email_password:
         email_password = getpass.getpass(prompt="Email password: ")
-        args.email.append(email_password)
+    args.email.append(email_password)
 
     # getting the sms twilio token either in environment variable or via a prompt
-    if args.sms and args.sms == default_sms:
-        twilio_token = os.environ.get("TWILIO_TOKEN")
-        args.sms = list(args.sms)
-        args.sms.append(twilio_token)
-
-    elif args.sms:
+    twilio_token = None if "--sms" in sys.argv else os.environ.get("SMS_TWILIO_TOKEN")
+    if not twilio_token:
         twilio_token = getpass.getpass(prompt="Token: ")
-        args.sms.append(twilio_token)
+    args.sms.append(twilio_token)
 
     main(args)

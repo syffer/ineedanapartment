@@ -61,7 +61,7 @@ def main(args):
             if new_locations:
                 alerter_manager.alert(new_locations)
 
-            if args.save_locations:
+            if args.save_locations and new_locations:
                 saver.save_locations(aggregator.get_known_locations())
 
             time.sleep(args.period)

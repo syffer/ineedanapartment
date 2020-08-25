@@ -19,8 +19,9 @@ class LocationAggregator(object):
 
         retrieved_locations = self.__retrieve_locations(criteria, yesterday)
         new_locations = retrieved_locations - self.__known_locations
-        unknown_locations = self.__known_locations - retrieved_locations
-        self.__known_locations.difference_update(unknown_locations)
+        self.__known_locations = {location for location in self.__known_locations if location.date > yesterday}
+        # unknown_locations = self.__known_locations - retrieved_locations
+        # self.__known_locations.difference_update(unknown_locations)
         self.__known_locations.update(retrieved_locations)
 
         new_locations = list(new_locations)

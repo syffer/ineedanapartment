@@ -7,18 +7,20 @@ import alerts.alerter
 
 class FreeMobileSelfSmsAlerter(alerts.alerter.Alerter):
 
+    FREE_MOBILE_URL_SEND_SMS = "https://smsapi.free-mobile.fr/sendmsg"
+
     def __init__(self, user_login, password):
         self.user_login = user_login
         self.password = password
 
     def alert(self, locations):
-        message = "{location.website} {location} {location.link}".format(location=locations[0])
+        for location in locations:
+            message = "{location.website} {location} {location.link}".format(location=location)
 
-        url = "https://smsapi.free-mobile.fr/sendmsg"
-        params = {
-            "user": self.user_login,
-            "pass": self.password,
-            "msg": message,
-        }
-        response = requests.get(url, params=params)
-        response.raise_for_status()
+            params = {
+                "user": self.user_login,
+                "pass": self.password,
+                "msg": message,
+            }
+            response = requests.get(self.FREE_MOBILE_URL_SEND_SMS, params=params)
+            response.raise_for_status()

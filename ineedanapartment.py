@@ -13,10 +13,12 @@ import alerts.sms
 import alerts.logs
 import alerts.freemobile
 import retrievers.ouestfrance
+import retrievers.bienici
 import retrievers.aggregator
 import criterias
 import savers.redis
 import savers.local
+import net.browser
 
 
 def main(args):
@@ -52,21 +54,28 @@ def main(args):
     known_locations = saver.load_locations() if args.save_locations else set()
 
     criteria = criterias.Criteria(**vars(args))
-    retriever = retrievers.ouestfrance.OuestFranceLocationRetriever()
-    aggregator = retrievers.aggregator.LocationAggregator(retriever, known_locations=known_locations)
+    with net.browser.Browser() as browser:
+        retriever_ouest_france = retrievers.ouestfrance.OuestFranceLocationRetriever()
+        retriever_bien_ici = retrievers.bienici.BienIciLocationRetriever(browser=browser)
+        aggregator = retrievers.aggregator.LocationAggregator(
+            # retriever_ouest_france,
+            retriever_bien_ici,
+            known_locations=known_locations
+        )
 
-    try:
-        while True:
-            new_locations = aggregator.retrieve_new_locations(criteria, args.since)
-            if new_locations:
-                alerter_manager.alert(new_locations)
+        try:
+            while True:
+                new_locations = aggregator.retrieve_new_locations(criteria, args.since)
+                if new_locations:
+                    alerter_manager.alert(new_locations)
 
-            if args.save_locations and new_locations:
-                saver.save_locations(aggregator.get_known_locations())
+                if args.save_locations and new_locations:
+                    saver.save_locations(aggregator.get_known_locations())
 
-            time.sleep(args.period)
-    except KeyboardInterrupt:
-        pass
+                time.sleep(args.period)
+                print("loop")
+        except KeyboardInterrupt:
+            pass
 
 
 def merge_env_variable(*env_vars, into=None):
@@ -94,9 +103,9 @@ if __name__ == "__main__":
         description="Easy way to get notified when a new apartment appears on ouest france for nantes."
     )
 
-    parser.add_argument("--period", nargs="?", default=5 * 60, type=int, env_var="PERIOD",
+    parser.add_argument("--period", default=5 * 60, type=int, env_var="PERIOD",
                         help="delay between each check in seconds")
-    parser.add_argument("--since", nargs="?", type=int, default=3, choices=range(1, 30), env_var="SINCE")
+    parser.add_argument("--since", type=int, default=3, choices=range(1, 30), env_var="SINCE")
     parser.add_argument("--save-locations", nargs="?", type=bool, const=True, default=False, env_var="SAVE_LOCATIONS",
                         help="Save locations between executions")
     # TODO change / add other savers depending on config
@@ -122,6 +131,7 @@ if __name__ == "__main__":
                              help="alerts via an sms using a twilio account. Will ask for Twilio token")
 
     args = parser.parse_args()
+    print(args)
 
     # getting the email password either in environment variable or via a prompt
     if args.email:

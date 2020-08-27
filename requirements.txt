@@ -4,3 +4,6 @@ jsonpickle
 configargparse
 requests
 redis
+selenium
+webdriver_manager
+psutil

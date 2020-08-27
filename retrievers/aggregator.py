@@ -1,6 +1,7 @@
 # coding: utf-8
 
 import datetime
+import traceback
 
 
 class LocationAggregator(object):
@@ -41,6 +42,7 @@ class LocationAggregator(object):
             return retriever.retrieve(criteria)
         except Exception as e:
             print("=> cannot retrieve locations with {} because {}".format(type(retriever), e))
+            traceback.print_exc()
             return set()
 
     def get_known_locations(self):

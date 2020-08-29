@@ -61,7 +61,11 @@ def main(args):
 
     criteria = criterias.Criteria(**vars(args))
 
-    driver_provider = net.drivers.firefox.FirefoxWebDriverProvider()
+    [firefox_binary_path, firefox_gecko_path] = args.firefox
+    driver_provider = net.drivers.firefox.FirefoxWebDriverProvider(
+        firefox_binary_path=firefox_binary_path,
+        firefox_gecko_path=firefox_gecko_path
+    )
     with net.browser.Browser(driver_provider=driver_provider) as browser:
         all_retrievers = {
             Websites.OUEST_FRANCE: retrievers.ouestfrance.OuestFranceLocationRetriever(),
@@ -110,6 +114,7 @@ if __name__ == "__main__":
     merge_env_variable("EMAIL_HOST", "EMAIL_PORT", "EMAIL_USER", into="EMAIL")
     merge_env_variable("FREE_MOBILE_USER", into="SMS_FREE_MOBILE")
     merge_env_variable("TWILIO_USER", "TWILIO_NUMBER_FROM", "TWILIO_NUMBER_TO", into="SMS_TWILIO")
+    merge_env_variable("FIREFOX_BIN", "FIREFOX_GECKODRIVER_PATH", into="FIREFOX_BROWSER")
 
     #
     parser = configargparse.ArgumentParser(
@@ -127,6 +132,8 @@ if __name__ == "__main__":
     parser.add_argument("--retrievers", nargs="+", env_var="RETRIEVERS", default={Websites.OUEST_FRANCE},
                         choices={Websites.OUEST_FRANCE, Websites.BIEN_ICI},
                         help="list of aggregators from where the locations should be retrieved")
+    parser.add_argument("--firefox", nargs=2, env_var="FIREFOX_BROWSER", default=[None, None],
+                        metavar=("FIREFOX_BINARY_PATH", "GECKODRIVER_PATH"))
 
     criteria_group = parser.add_argument_group("Criteria")
     criteria_group.add_argument("--min-price", type=int, env_var="MIN_PRICE")

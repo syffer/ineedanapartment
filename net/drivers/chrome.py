@@ -10,10 +10,10 @@ import net.drivers.provider
 
 class ChromeWebDriverProvider(net.drivers.provider.WebDriverProvider):
 
-    def get_driver_manager_class(self):
-        return webdriver_manager.chrome.ChromeDriverManager
-
     def get_driver(self, executable_path):
+        manager = webdriver_manager.chrome.ChromeDriverManager
+        executable_path = manager.install()
+
         chrome_options = selenium.webdriver.chrome.options.Options()
         chrome_options.add_argument("--headless")
 

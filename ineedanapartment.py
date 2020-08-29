@@ -148,7 +148,6 @@ if __name__ == "__main__":
                              help="alerts via an sms using a twilio account. Will ask for Twilio token")
 
     args = parser.parse_args()
-    print(args)
 
     # getting the email password either in environment variable or via a prompt
     if args.email:

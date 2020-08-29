@@ -19,6 +19,7 @@ import criterias
 import savers.redis
 import savers.local
 import net.browser
+import net.drivers.firefox
 
 
 def main(args):
@@ -54,7 +55,9 @@ def main(args):
     known_locations = saver.load_locations() if args.save_locations else set()
 
     criteria = criterias.Criteria(**vars(args))
-    with net.browser.Browser() as browser:
+
+    driver_provider = net.drivers.firefox.FirefoxWebDriverProvider()
+    with net.browser.Browser(driver_provider) as browser:
         retriever_ouest_france = retrievers.ouestfrance.OuestFranceLocationRetriever()
         retriever_bien_ici = retrievers.bienici.BienIciLocationRetriever(browser=browser)
         aggregator = retrievers.aggregator.LocationAggregator(
@@ -73,7 +76,6 @@ def main(args):
                     saver.save_locations(aggregator.get_known_locations())
 
                 time.sleep(args.period)
-                print("loop")
         except KeyboardInterrupt:
             pass
 

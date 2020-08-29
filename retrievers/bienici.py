@@ -62,7 +62,6 @@ class BienIciLocationRetriever(retrievers.retriever.LocationRetriever):
         params = {key: value for key, value in params.items() if value is not None}
 
         self.browser.load_page(url=url, params=params)
-        print("page loaded")
 
         # wait for the web page to be loaded
         # .. warning:: some times the web page will take way too much time to load
@@ -79,7 +78,6 @@ class BienIciLocationRetriever(retrievers.retriever.LocationRetriever):
         parsed_url = urllib.parse.urlparse(url)
         base_url = "{uri.scheme}://{uri.netloc}".format(uri=parsed_url)
 
-        print(len(tags))
         return [create_location(base_url, tag) for tag in tags]
 
 

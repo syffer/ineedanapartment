@@ -7,3 +7,4 @@ redis
 selenium
 webdriver_manager
 psutil
+dateparser

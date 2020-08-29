@@ -42,6 +42,7 @@ class FirefoxWebDriverProvider(net.drivers.provider.WebDriverProvider):
     def get_driver(self):
         firefox_options = selenium.webdriver.firefox.options.Options()
         firefox_options.headless = True
+        firefox_options.log.level = "trace"
 
         firefox_profile = selenium.webdriver.firefox.options.FirefoxProfile()
         firefox_profile.set_preference("dom.disable_beforeunload", True)

@@ -22,6 +22,11 @@ import net.browser
 import net.drivers.firefox
 
 
+class Websites:
+    OUEST_FRANCE = "ouestfrance"
+    BIEN_ICI = "bienici"
+
+
 def main(args):
     alerter_manager = alerts.manager.AlerterManager()
     alerter_manager.add_alerter(alerts.logs.LogAlerter())
@@ -57,12 +62,19 @@ def main(args):
     criteria = criterias.Criteria(**vars(args))
 
     driver_provider = net.drivers.firefox.FirefoxWebDriverProvider()
-    with net.browser.Browser(driver_provider) as browser:
-        retriever_ouest_france = retrievers.ouestfrance.OuestFranceLocationRetriever()
-        retriever_bien_ici = retrievers.bienici.BienIciLocationRetriever(browser=browser)
+    with net.browser.Browser(driver_provider=driver_provider) as browser:
+        all_retrievers = {
+            Websites.OUEST_FRANCE: retrievers.ouestfrance.OuestFranceLocationRetriever(),
+            Websites.BIEN_ICI: retrievers.bienici.BienIciLocationRetriever(browser=browser),
+        }
+        used_retrievers = [
+            retriever
+            for retriever_name, retriever in all_retrievers.items()
+            if retriever_name in args.retrievers
+        ]
+
         aggregator = retrievers.aggregator.LocationAggregator(
-            # retriever_ouest_france,
-            retriever_bien_ici,
+            *used_retrievers,
             known_locations=known_locations
         )
 
@@ -112,6 +124,9 @@ if __name__ == "__main__":
                         help="Save locations between executions")
     # TODO change / add other savers depending on config
     parser.add_argument("--redis", dest="redis_url", env_var="REDIS_URL")
+    parser.add_argument("--retrievers", nargs="+", env_var="RETRIEVERS", default={Websites.OUEST_FRANCE},
+                        choices={Websites.OUEST_FRANCE, Websites.BIEN_ICI},
+                        help="list of aggregators from where the locations should be retrieved")
 
     criteria_group = parser.add_argument_group("Criteria")
     criteria_group.add_argument("--min-price", type=int, env_var="MIN_PRICE")

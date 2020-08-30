@@ -142,10 +142,13 @@ if __name__ == "__main__":
     parser.add_argument("--retrievers", nargs="+", env_var="RETRIEVERS", default={Websites.OUEST_FRANCE},
                         choices={Websites.OUEST_FRANCE, Websites.BIEN_ICI},
                         help="list of aggregators from where the locations should be retrieved")
-    parser.add_argument("--firefox", nargs=2, env_var="FIREFOX_BROWSER", default=[None, None],
-                        metavar=("FIREFOX_BINARY_PATH", "GECKODRIVER_PATH"))
-    parser.add_argument("--google", nargs=2, env_var="CHROME_BROWSER",
-                        metavar=("CHROME_BINARY_PATH", "CHROME_DRIVER_PATH"))
+
+    browser_group = parser.add_argument_group("Browsers")
+    browser_mutually_exclusive_group = browser_group.add_mutually_exclusive_group()
+    browser_mutually_exclusive_group.add_argument("--firefox", nargs=2, env_var="FIREFOX_BROWSER", default=[None, None],
+                                                  metavar=("FIREFOX_BINARY_PATH", "GECKO_DRIVER_PATH"))
+    browser_mutually_exclusive_group.add_argument("--google", nargs=2, env_var="CHROME_BROWSER",
+                                                  metavar=("CHROME_BINARY_PATH", "CHROME_DRIVER_PATH"))
 
     criteria_group = parser.add_argument_group("Criteria")
     criteria_group.add_argument("--min-price", type=int, env_var="MIN_PRICE")
